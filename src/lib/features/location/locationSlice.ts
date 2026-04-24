@@ -1,19 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface LocationData {
-    id: string | number;
-    address: string;
-    city?: string;
-    area?: string;
-    longitude: number;
-    latitude: number;
-    uCode?: string;
-}
+import { AutocompleteResult } from "barikoiapis";
 
 interface LocationState {
     searchQuery: string;
-    results: LocationData[];
-    selectedLocation: LocationData | null;
+    results: AutocompleteResult[];
+    selectedLocation: AutocompleteResult | null;
     isLoading: boolean;
     error: string | null;
 }
@@ -32,28 +23,38 @@ const locationSlice = createSlice({
     reducers: {
         setSearchQuery: (state, action: PayloadAction<string>) => {
             state.searchQuery = action.payload;
+            state.error = null;
         },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoading = action.payload;
+            if (action.payload) {
+                state.error = null;
+            }
         },
-        setResults: (state, action: PayloadAction<LocationData[]>) => {
+        setResults: (state, action: PayloadAction<AutocompleteResult[]>) => {
             state.results = action.payload;
             state.isLoading = false;
             state.error = null;
         },
         setError: (state, action: PayloadAction<string>) => {
-            state.error = action.payload;
+            state.results = [];
             state.isLoading = false;
+            state.error = action.payload;
         },
-        selectLocation: (state, action: PayloadAction<LocationData>) => {
+        selectLocation: (state, action: PayloadAction<AutocompleteResult>) => {
             state.selectedLocation = action.payload;
         },
         clearSelection: (state) => {
             state.selectedLocation = null;
         },
+        clearResults: (state) => {
+            state.results = [];
+            state.isLoading = false;
+            state.error = null;
+        },
     },
 });
 
-export const { setSearchQuery, setLoading, setResults, setError, selectLocation, clearSelection } = locationSlice.actions;
+export const { setSearchQuery, setLoading, setResults, setError, selectLocation, clearSelection, clearResults } = locationSlice.actions;
 
 export default locationSlice.reducer;

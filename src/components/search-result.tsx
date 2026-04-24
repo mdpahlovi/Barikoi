@@ -41,28 +41,24 @@ export default function SearchResult() {
                 <p className="text-muted-foreground">Searching for the location...</p>
             </>
         );
-    }
-
-    if (error) {
+    } else if (error) {
         view = (
             <>
                 <AlertCircle className="h-8 w-8 opacity-50" />
-                <p className="text-muted-foreground">{error}</p>
+                <p className="text-muted-foreground text-center">{error}</p>
             </>
         );
-    }
-
-    if (searchQuery.length) {
+    } else if (searchQuery.length) {
         view = (
             <>
-                <p className="text-muted-foreground">No results found for &quot;{searchQuery}&quot;</p>
+                <p className="text-muted-foreground text-center">No results found for &quot;{searchQuery}&quot;</p>
             </>
         );
     } else {
         view = (
             <>
                 <Search className="h-8 w-8 opacity-50" />
-                <p className="text-muted-foreground">Start typing to search locations.</p>
+                <p className="text-muted-foreground text-center">Start typing to search locations.</p>
             </>
         );
     }

@@ -1,59 +1,61 @@
 "use client";
 
-import { LocationData, setError, setLoading, setResults, setSearchQuery } from "@/lib/features/location/locationSlice";
+import {
+    clearResults,
+    clearSelection,
+    selectLocation,
+    setError,
+    setLoading,
+    setResults,
+    setSearchQuery,
+} from "@/lib/features/location/locationSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { autocomplete, setConfig } from "barikoiapis";
 import { Search } from "lucide-react";
 import { useEffect } from "react";
 
-const MOCK_RESULTS: LocationData[] = [
-    { id: 1, address: "Barikoi Office", city: "Dhaka", area: "Banani", longitude: 90.4043, latitude: 23.7915, uCode: "BKOI1" },
-    { id: 2, address: "Gulshan 2 Circle", city: "Dhaka", area: "Gulshan", longitude: 90.4125, latitude: 23.7936, uCode: "GLS2" },
-    { id: 3, address: "Dhanmondi Lake", city: "Dhaka", area: "Dhanmondi", longitude: 90.3788, latitude: 23.7461, uCode: "DHN1" },
-    { id: 4, address: "Mirpur 10 Roundabout", city: "Dhaka", area: "Mirpur", longitude: 90.3687, latitude: 23.8068, uCode: "MRP10" },
-    {
-        id: 5,
-        address: "Bashundhara City Shopping Mall",
-        city: "Dhaka",
-        area: "Panthapath",
-        longitude: 90.3897,
-        latitude: 23.7503,
-        uCode: "PNT1",
-    },
-];
-
 export default function SearchBar() {
+    const apiKey = process.env.NEXT_PUBLIC_BARIKOI_API_KEY;
     const dispatch = useAppDispatch();
     const { searchQuery } = useAppSelector((state) => state.location);
 
     useEffect(() => {
-        if (!searchQuery.trim()) {
-            dispatch(setResults([]));
+        const query = searchQuery.trim();
+
+        if (query.length < 2) {
+            dispatch(clearResults());
+            if (!query.length) {
+                dispatch(clearSelection());
+            }
             return;
         }
 
-        const timer = setTimeout(() => {
-            dispatch(setLoading(true));
-
+        const timeoutId = window.setTimeout(async () => {
             try {
-                const filtered = MOCK_RESULTS.filter(
-                    (res) =>
-                        res.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        res.area?.toLowerCase().includes(searchQuery.toLowerCase()),
-                );
+                dispatch(setLoading(true));
 
-                if (filtered.length === 0) {
-                    dispatch(setError('No locations found. Try searching for "Banani" or "Gulshan".'));
-                    dispatch(setResults([]));
-                } else {
-                    dispatch(setResults(filtered));
+                setConfig({ apiKey, version: "v1" });
+
+                const response = await autocomplete({ q: query });
+
+                if (!response.places) {
+                    dispatch(clearSelection());
+                    dispatch(setError(`No locations found for "${query}".`));
+                    return;
                 }
-            } catch (error) {
-                dispatch(setError("Failed to fetch locations"));
-            }
-        }, 500);
 
-        return () => clearTimeout(timer);
-    }, [searchQuery, dispatch]);
+                dispatch(setResults(response.places));
+                dispatch(selectLocation(response.places[0]));
+            } catch (error) {
+                dispatch(clearSelection());
+                dispatch(setError(error instanceof Error ? error.message : "Failed to fetch locations."));
+            }
+        }, 350);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+        };
+    }, [dispatch, searchQuery]);
 
     return (
         <div className="relative">
