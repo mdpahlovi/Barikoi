@@ -10,8 +10,8 @@ const FALLBACK_LOCATION = {
     address: "Dhaka, Bangladesh",
     city: "Dhaka",
     area: "Bangladesh",
-    longitude: "90.4125",
-    latitude: "23.8103",
+    latitude: 23.8103,
+    longitude: 90.4125,
 };
 
 export default function BarikoiMap() {
@@ -34,7 +34,7 @@ export default function BarikoiMap() {
         }
 
         mapRef.current.flyTo({
-            center: [Number(activeLocation.longitude), Number(activeLocation.latitude)],
+            center: [activeLocation.longitude, activeLocation.latitude],
             zoom: 15,
             essential: true,
         });
@@ -53,8 +53,8 @@ export default function BarikoiMap() {
             ref={mapRef}
             mapStyle={mapStyle}
             initialViewState={{
-                longitude: Number(activeLocation.longitude),
-                latitude: Number(activeLocation.latitude),
+                longitude: activeLocation.longitude,
+                latitude: activeLocation.latitude,
                 zoom: selectedLocation ? 15 : 11,
                 bearing: 0,
                 pitch: 0,
@@ -65,10 +65,10 @@ export default function BarikoiMap() {
             doubleClickZoom
             dragRotate={false}
         >
-            <Marker longitude={Number(activeLocation.longitude)} latitude={Number(activeLocation.latitude)} color="#0f766e" />
+            <Marker longitude={activeLocation.longitude} latitude={activeLocation.latitude} color="#0f766e" />
             <Popup
-                longitude={Number(activeLocation.longitude)}
-                latitude={Number(activeLocation.latitude)}
+                longitude={activeLocation.longitude}
+                latitude={activeLocation.latitude}
                 closeButton={false}
                 closeOnClick={false}
                 anchor="bottom"

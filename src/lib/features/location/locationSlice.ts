@@ -1,13 +1,22 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AutocompleteResult } from "barikoiapis";
 
-interface LocationState {
+type LocationResult = {
+    id: string;
+    address: string;
+    city: string;
+    area: string;
+    latitude: number;
+    longitude: number;
+};
+
+type LocationState = {
     searchQuery: string;
-    results: AutocompleteResult[];
-    selectedLocation: AutocompleteResult | null;
+    results: LocationResult[];
+    selectedLocation: LocationResult | null;
     isLoading: boolean;
     error: string | null;
-}
+};
 
 const initialState: LocationState = {
     searchQuery: "",
@@ -32,7 +41,14 @@ const locationSlice = createSlice({
             }
         },
         setResults: (state, action: PayloadAction<AutocompleteResult[]>) => {
-            state.results = action.payload;
+            state.results = action.payload.map((result) => ({
+                id: `${result.latitude}${result.longitude}`,
+                address: result.address,
+                city: result.city,
+                area: result.area,
+                latitude: Number(result.latitude),
+                longitude: Number(result.longitude),
+            }));
             state.isLoading = false;
             state.error = null;
         },
@@ -41,7 +57,7 @@ const locationSlice = createSlice({
             state.isLoading = false;
             state.error = action.payload;
         },
-        selectLocation: (state, action: PayloadAction<AutocompleteResult>) => {
+        selectLocation: (state, action: PayloadAction<LocationResult>) => {
             state.selectedLocation = action.payload;
         },
         clearSelection: (state) => {

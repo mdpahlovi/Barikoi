@@ -38,14 +38,23 @@ export default function SearchBar() {
 
                 const response = await autocomplete({ q: query });
 
-                if (!response.places) {
+                if (response.places?.length === 0) {
                     dispatch(clearSelection());
                     dispatch(setError(`No locations found for "${query}".`));
                     return;
                 }
 
                 dispatch(setResults(response.places));
-                dispatch(selectLocation(response.places[0]));
+                dispatch(
+                    selectLocation({
+                        id: `${response.places[0].latitude}${response.places[0].longitude}`,
+                        address: response.places[0].address,
+                        city: response.places[0].city,
+                        area: response.places[0].area,
+                        latitude: Number(response.places[0].latitude),
+                        longitude: Number(response.places[0].longitude),
+                    }),
+                );
             } catch (error) {
                 dispatch(clearSelection());
                 dispatch(setError(error instanceof Error ? error.message : "Failed to fetch locations."));
@@ -55,7 +64,7 @@ export default function SearchBar() {
         return () => {
             window.clearTimeout(timeoutId);
         };
-    }, [dispatch, searchQuery]);
+    }, [apiKey, dispatch, searchQuery]);
 
     return (
         <div className="relative">
